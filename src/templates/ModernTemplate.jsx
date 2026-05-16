@@ -8,7 +8,7 @@ export default function ModernTemplate({ portfolio }) {
       <div className="relative mx-auto max-w-6xl px-5 py-8">
         <nav className="flex items-center justify-between border-b pb-5" style={{ borderColor: `${portfolio.accentColor}33` }}>
           <div className="text-xl font-black">Port<span style={{ color: portfolio.accentColor }}>Zen</span></div>
-          <div className="border px-4 py-2 text-sm" style={{ borderColor: `${portfolio.accentColor}33`, backgroundColor: `${theme.surfaceColor}cc`, borderRadius: theme.cornerRadius }}>Available for work</div>
+          <div className="border px-4 py-2 text-sm" style={{ borderColor: `${portfolio.accentColor}33`, backgroundColor: `${theme.surfaceColor}cc`, borderRadius: theme.cornerRadius }}></div>
         </nav>
         {portfolio.sections.map((section) => (
           <SectionRenderer key={section.id} section={section} portfolio={portfolio} variant="dark" />

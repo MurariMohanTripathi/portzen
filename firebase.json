@@ -1,8 +1,4 @@
 {
-  "functions": {
-    "source": "server",
-    "runtime": "nodejs20"
-  },
   "hosting": {
     "public": "dist",
     "ignore": [
@@ -11,13 +7,6 @@
       "**/node_modules/**"
     ],
     "rewrites": [
-      {
-        "source": "/api/**",
-        "function": {
-          "functionId": "api",
-          "region": "asia-south1"
-        }
-      },
       {
         "source": "**",
         "destination": "/index.html"
