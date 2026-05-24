@@ -1,29 +1,26 @@
-export const reservedUsernames = ["admin", "api", "support", "login", "signup"];
+export const reservedUsernames = ["admin", "dashboard", "login", "signup", "api", "settings", "portfolio", "support"];
 
 export const sectionTypes = [
   "Hero",
   "About",
-  "Skills",
   "Projects",
+  "Skills",
   "Experience",
-  "Education",
   "Certifications",
   "Achievements",
-  "Resume",
+  "Education",
   "Contact",
-  "Testimonials",
-  "Tech Stack",
-  "Open Source",
-  "Blogs",
-  "YouTube",
-  "Custom",
+  "Social Links",
+  "GitHub Stats",
+  "User Stories",
+  "CustomHTML",
 ];
 
 export const templates = [
   {
-    id: "modern",
-    name: "Modern Developer",
-    description: "Dark neon layout with animated surfaces and project-first sections.",
+    id: "cyberpunk",
+    name: "Cyberpunk",
+    description: "Dark neon developer portfolio with animated futuristic cards.",
     accent: "#22d3ee",
   },
   {
@@ -88,7 +85,7 @@ export const defaultPortfolio = {
   username: "",
   displayName: "",
   headline: "",
-  template: "modern",
+  template: "cyberpunk",
   accentColor: "#22d3ee",
   theme: themePresets[0],
   profileImage: "",
@@ -102,8 +99,16 @@ export const defaultPortfolio = {
     website: "",
     email: "",
   },
+  githubUsername: "",
+  customCode: {
+    enabled: false,
+    html: "<main class=\"folio\">\n  <section>\n    <p class=\"eyebrow\">Custom portfolio</p>\n    <h1>Your Name</h1>\n    <p>Build a fully personalized portfolio with your own HTML and CSS.</p>\n  </section>\n</main>",
+    css: "body {\n  margin: 0;\n  min-height: 100vh;\n  background: #050505;\n  color: #f8fafc;\n  font-family: Inter, system-ui, sans-serif;\n}\n\n.folio {\n  min-height: 100vh;\n  display: grid;\n  place-items: center;\n  padding: 48px;\n}\n\nsection {\n  max-width: 760px;\n}\n\n.eyebrow {\n  color: #22d3ee;\n  text-transform: uppercase;\n  letter-spacing: 0.18em;\n}\n\nh1 {\n  font-size: clamp(48px, 10vw, 120px);\n  line-height: 0.95;\n  margin: 16px 0;\n}\n\np {\n  font-size: 20px;\n  line-height: 1.7;\n}",
+  },
   analytics: {
     views: 0,
+    uniqueVisitors: 0,
+    visits: 0,
     bookmarks: 0,
     clicks: 0,
   },
@@ -111,8 +116,9 @@ export const defaultPortfolio = {
     {
       id: "hero",
       type: "Hero",
+      visible: true,
       title: "Hero",
-      data: {
+      props: {
         cta: "View Projects",
         location: "India",
       },
@@ -120,8 +126,9 @@ export const defaultPortfolio = {
     {
       id: "about",
       type: "About",
+      visible: true,
       title: "About",
-      data: {
+      props: {
         text:
           "I design and ship full stack web products, from auth and dashboards to public portfolio experiences.",
       },
@@ -129,16 +136,18 @@ export const defaultPortfolio = {
     {
       id: "skills",
       type: "Skills",
+      visible: true,
       title: "Skills",
-      data: {
+      props: {
         items: ["React", "Node.js", "Firebase", "Firestore", "Express", "MongoDB", "Tailwind CSS"],
       },
     },
     {
       id: "projects",
       type: "Projects",
+      visible: true,
       title: "Featured Projects",
-      data: {
+      props: {
         items: [
           {
             id: "p1",
@@ -168,8 +177,9 @@ export const defaultPortfolio = {
     {
       id: "experience",
       type: "Experience",
+      visible: true,
       title: "Experience",
-      data: {
+      props: {
         items: [
           {
             role: "Full Stack Engineer",
@@ -181,42 +191,27 @@ export const defaultPortfolio = {
       },
     },
     {
-      id: "custom-win",
-      type: "Custom",
-      title: "Highlights",
-      data: {
-        components: [
-          {
-            id: "c1",
-            componentType: "customCard",
-            props: {
-              title: "Hackathon Winner",
-              description: "Won SIH 2026 with a developer automation product.",
-              color: "cyan",
-            },
-          },
-          {
-            id: "c2",
-            componentType: "stats",
-            props: {
-              label: "Open source contributions",
-              value: "48",
-            },
-          },
-        ],
+      id: "github-stats",
+      type: "GitHub Stats",
+      visible: true,
+      title: "GitHub Stats",
+      props: {
+        username: "",
       },
     },
     {
       id: "stories",
-      type: "Blogs",
+      type: "User Stories",
+      visible: true,
       title: "Developer Stories",
-      data: {},
+      props: {},
     },
     {
       id: "contact",
       type: "Contact",
+      visible: true,
       title: "Contact",
-      data: {
+      props: {
         text: "Open to freelance SaaS builds, product engineering, and collaboration.",
       },
     },

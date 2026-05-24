@@ -3,16 +3,19 @@ import toast from "react-hot-toast";
 import { defaultPortfolio, sectionTypes, templates, themePresets } from "../data/portfolioSchema";
 import { useAuth } from "../contexts/AuthContext";
 import { getPortfolioByUid, savePortfolio } from "../services/portfolioService";
+import { fetchGitHubProfile } from "../services/githubService";
+import { uploadProjectImage } from "../services/storageService";
 import useUsernameAvailability from "../hooks/useUsernameAvailability";
 import { normalizeUsername, validateUsername, wordsCount } from "../utils/username";
+import { createSection, duplicateSection, normalizeSections } from "../utils/sections";
 import TemplateRenderer from "../templates/TemplateRenderer";
 import Button from "../components/ui/Button";
 import Field, { inputClass } from "../components/ui/Field";
 import LoadingScreen from "../components/ui/LoadingScreen";
-
-function makeId(prefix) {
-  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-}
+import DragDropContainer from "../components/portfolio/DragDropContainer";
+import EditableSection from "../components/portfolio/EditableSection";
+import DynamicFieldRenderer from "../components/portfolio/DynamicFieldRenderer";
+import CustomCodePortfolio from "../components/portfolio/CustomCodePortfolio";
 
 export default function Dashboard({ view }) {
   const { user } = useAuth();
@@ -31,10 +34,12 @@ export default function Dashboard({ view }) {
           email: user.email,
           displayName: data.displayName || user.displayName || "",
           socials: {
-            ...defaultPortfolio.socials,
-            ...data.socials,
+          ...defaultPortfolio.socials,
+          ...data.socials,
             email: data.socials?.email || user.email || "",
           },
+          customCode: { ...defaultPortfolio.customCode, ...data.customCode },
+          sections: normalizeSections(data.sections || defaultPortfolio.sections),
         };
         setPortfolio(next);
         setSavedUsername(next.username || "");
@@ -54,11 +59,11 @@ export default function Dashboard({ view }) {
         toast.error(validation.reason);
         return;
       }
-      if (!portfolio.displayName.trim()) {
+      if (!portfolio.customCode?.enabled && !portfolio.displayName.trim()) {
         toast.error("Full name is required.");
         return;
       }
-      if (!portfolio.headline.trim()) {
+      if (!portfolio.customCode?.enabled && !portfolio.headline.trim()) {
         toast.error("Headline is required.");
         return;
       }
@@ -112,6 +117,7 @@ export default function Dashboard({ view }) {
       {view === "projects" && <Projects portfolio={portfolio} setPortfolio={setPortfolio} />}
       {view === "experience" && <Experience portfolio={portfolio} setPortfolio={setPortfolio} />}
       {view === "templates" && <Templates portfolio={portfolio} setPortfolio={setPortfolio} />}
+      {view === "code" && <CodeYourOwnFolio portfolio={portfolio} setPortfolio={setPortfolio} />}
       {view === "stories" && <Stories portfolio={portfolio} setPortfolio={setPortfolio} />}
       {view === "settings" && <Settings portfolio={portfolio} setPortfolio={setPortfolio} availability={availability} />}
     </div>
@@ -173,6 +179,7 @@ function ProfileEditor({ portfolio, setPortfolio, availability }) {
       <Field label="Summary"><textarea className={inputClass} rows={4} value={portfolio.summary} onChange={(e) => update("summary", e.target.value)} /></Field>
       <div className="grid gap-4 md:grid-cols-2">
         {["github", "linkedin", "website", "email"].map((key) => <Field key={key} label={key}><input className={inputClass} value={portfolio.socials?.[key] || ""} onChange={(e) => updateSocial(key, e.target.value)} /></Field>)}
+        <Field label="GitHub username"><input className={inputClass} value={portfolio.githubUsername || ""} onChange={(e) => update("githubUsername", e.target.value.trim())} /></Field>
       </div>
     </Panel>
   );
@@ -239,58 +246,37 @@ function ColorField({ label, value, onChange }) {
 }
 
 function SectionManager({ portfolio, setPortfolio }) {
-  const [draggedId, setDraggedId] = useState(null);
-
   function addSection(type) {
-    const id = makeId(type.toLowerCase().replace(/\s+/g, "-"));
-    const data = type === "Custom" ? { components: [{ id: makeId("c"), componentType: "customCard", props: { title: "New card", description: "Describe this highlight." } }] } : { items: [] };
-    setPortfolio((prev) => ({ ...prev, sections: [...prev.sections, { id, type, title: type, data }] }));
+    setPortfolio((prev) => ({ ...prev, sections: [...normalizeSections(prev.sections), createSection(type)] }));
   }
   function remove(id) {
     setPortfolio((prev) => ({ ...prev, sections: prev.sections.filter((section) => section.id !== id) }));
   }
-  function title(id, value) {
-    setPortfolio((prev) => ({ ...prev, sections: prev.sections.map((section) => section.id === id ? { ...section, title: value } : section) }));
+  function updateSection(id, updates) {
+    setPortfolio((prev) => ({ ...prev, sections: normalizeSections(prev.sections).map((section) => section.id === id ? { ...section, ...updates } : section) }));
   }
-  function reorder(targetId) {
-    if (!draggedId || draggedId === targetId) return;
-    setPortfolio((prev) => {
-      const next = [...prev.sections];
-      const from = next.findIndex((section) => section.id === draggedId);
-      const to = next.findIndex((section) => section.id === targetId);
-      if (from < 0 || to < 0) return prev;
-      const [item] = next.splice(from, 1);
-      next.splice(to, 0, item);
-      return { ...prev, sections: next };
-    });
+  function reorder(sections) {
+    setPortfolio((prev) => ({ ...prev, sections }));
   }
+  const sections = normalizeSections(portfolio.sections);
   return (
     <Panel title="Dynamic Sections">
       <div className="flex flex-wrap gap-2">{sectionTypes.map((type) => <Button key={type} variant="secondary" onClick={() => addSection(type)}>Add {type}</Button>)}</div>
       <div className="mt-5 space-y-3">
-        {portfolio.sections.map((section) => (
-          <div
-            key={section.id}
-            draggable
-            onDragStart={(e) => {
-              setDraggedId(section.id);
-              e.dataTransfer.effectAllowed = "move";
-            }}
-            onDragOver={(e) => {
-              e.preventDefault();
-              reorder(section.id);
-            }}
-            onDragEnd={() => setDraggedId(null)}
-            className={`rounded-xl border p-4 transition ${draggedId === section.id ? "border-cyan-300 bg-cyan-300/10 opacity-70" : "border-white/10 bg-zinc-950/60"}`}
-          >
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="cursor-grab select-none rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-300 active:cursor-grabbing">Drag</span>
-              <input className={inputClass} value={section.title} onChange={(e) => title(section.id, e.target.value)} />
-              <span className="rounded-lg bg-white/5 px-3 py-2 text-xs text-zinc-400">{section.type}</span>
-              <Button variant="danger" onClick={() => remove(section.id)}>Delete</Button>
-            </div>
-          </div>
-        ))}
+        <DragDropContainer items={sections} onReorder={reorder}>
+          {sections.map((section) => (
+            <EditableSection
+              key={section.id}
+              section={section}
+              onTitle={(title) => updateSection(section.id, { title })}
+              onToggle={() => updateSection(section.id, { visible: section.visible === false })}
+              onDuplicate={() => setPortfolio((prev) => ({ ...prev, sections: [...normalizeSections(prev.sections), duplicateSection(section)] }))}
+              onRemove={() => remove(section.id)}
+            >
+              <DynamicFieldRenderer section={section} onChange={(props) => updateSection(section.id, { props })} />
+            </EditableSection>
+          ))}
+        </DragDropContainer>
       </div>
     </Panel>
   );
@@ -298,24 +284,29 @@ function SectionManager({ portfolio, setPortfolio }) {
 
 function Projects({ portfolio, setPortfolio }) {
   const projectsSection = portfolio.sections.find((section) => section.type === "Projects");
-  const projects = projectsSection?.data?.items || [];
-  const updateProjects = (items) => setPortfolio((prev) => ({ ...prev, sections: prev.sections.map((section) => section.id === projectsSection.id ? { ...section, data: { ...section.data, items } } : section) }));
+  const projects = projectsSection?.props?.items || projectsSection?.data?.items || [];
+  const updateProjects = (items) => setPortfolio((prev) => ({ ...prev, sections: prev.sections.map((section) => section.id === projectsSection.id ? { ...section, props: { ...(section.props || section.data), items } } : section) }));
   const add = () => updateProjects([...projects, { id: `p-${Date.now()}`, title: "New Project", description: "", techStack: [], githubUrl: "", liveUrl: "", coverImage: "", screenshots: [], featured: false }]);
-  return <CollectionEditor title="Projects" items={projects} add={add} updateItems={updateProjects} fields={["title", "description", "githubUrl", "liveUrl"]} />;
+  return <CollectionEditor title="Projects" items={projects} add={add} updateItems={updateProjects} fields={["title", "description", "techStack", "githubUrl", "liveUrl", "coverImage", "featured"]} uid={portfolio.uid} />;
 }
 
 function Experience({ portfolio, setPortfolio }) {
   const section = portfolio.sections.find((item) => item.type === "Experience");
-  const items = section?.data?.items || [];
-  const updateItems = (next) => setPortfolio((prev) => ({ ...prev, sections: prev.sections.map((item) => item.id === section.id ? { ...item, data: { ...item.data, items: next } } : item) }));
+  const items = section?.props?.items || section?.data?.items || [];
+  const updateItems = (next) => setPortfolio((prev) => ({ ...prev, sections: prev.sections.map((item) => item.id === section.id ? { ...item, props: { ...(item.props || item.data), items: next } } : item) }));
   const add = () => updateItems([...items, { role: "Role", company: "Company", period: "2026", summary: "" }]);
   return <CollectionEditor title="Experience" items={items} add={add} updateItems={updateItems} fields={["role", "company", "period", "summary"]} />;
 }
 
-function CollectionEditor({ title, items, add, updateItems, fields }) {
+function CollectionEditor({ title, items, add, updateItems, fields, uid }) {
   function update(index, field, value) {
-    const next = items.map((item, itemIndex) => itemIndex === index ? { ...item, [field]: value } : item);
+    const normalized = field === "techStack" ? value.split(",").map((item) => item.trim()).filter(Boolean) : field === "featured" ? Boolean(value) : value;
+    const next = items.map((item, itemIndex) => itemIndex === index ? { ...item, [field]: normalized } : item);
     updateItems(next);
+  }
+  async function upload(index, file) {
+    const url = await uploadProjectImage(uid, file);
+    update(index, "coverImage", url);
   }
   return (
     <Panel title={title} action={<Button onClick={add}>Add {title.slice(0, -1)}</Button>}>
@@ -323,7 +314,16 @@ function CollectionEditor({ title, items, add, updateItems, fields }) {
         {items.map((item, index) => (
           <div className="rounded-2xl border border-white/10 bg-zinc-950/60 p-4" key={item.id || index}>
             <div className="grid gap-3 md:grid-cols-2">
-              {fields.map((field) => <Field key={field} label={field}><input className={inputClass} value={item[field] || ""} onChange={(e) => update(index, field, e.target.value)} /></Field>)}
+              {fields.map((field) => (
+                <Field key={field} label={field}>
+                  {field === "featured" ? (
+                    <input className="h-5 w-5 accent-cyan-300" type="checkbox" checked={Boolean(item[field])} onChange={(e) => update(index, field, e.target.checked)} />
+                  ) : (
+                    <input className={inputClass} value={Array.isArray(item[field]) ? item[field].join(", ") : item[field] || ""} onChange={(e) => update(index, field, e.target.value)} />
+                  )}
+                </Field>
+              ))}
+              {title === "Projects" ? <Field label="Upload cover"><input className={inputClass} type="file" accept="image/*" onChange={(e) => upload(index, e.target.files?.[0])} /></Field> : null}
             </div>
             <Button className="mt-3" variant="danger" onClick={() => updateItems(items.filter((_, itemIndex) => itemIndex !== index))}>Delete</Button>
           </div>
@@ -341,6 +341,60 @@ function Templates({ portfolio, setPortfolio }) {
       <p className="mt-2 text-sm text-zinc-400">{template.description}</p>
     </button>
   ))}</div>;
+}
+
+function CodeYourOwnFolio({ portfolio, setPortfolio }) {
+  const customCode = { ...defaultPortfolio.customCode, ...portfolio.customCode };
+  const update = (updates) => {
+    setPortfolio((prev) => ({
+      ...prev,
+      customCode: { ...defaultPortfolio.customCode, ...prev.customCode, ...updates },
+    }));
+  };
+
+  return (
+    <div className="grid gap-6 xl:grid-cols-[minmax(0,560px)_1fr]">
+      <div className="space-y-5">
+        <Panel
+          title="Code Your Own Folio"
+          action={
+            <Button variant={customCode.enabled ? "primary" : "secondary"} onClick={() => update({ enabled: !customCode.enabled })}>
+              {customCode.enabled ? "Code Mode On" : "Use Code Mode"}
+            </Button>
+          }
+        >
+          <p className="text-sm leading-6 text-zinc-400">
+            Build a fully custom public portfolio with HTML and CSS. Normal builder sections stay saved, so switching back to normal mode will restore the generated portfolio.
+          </p>
+          <div className="rounded-xl border border-cyan-300/20 bg-cyan-300/10 p-4 text-sm text-cyan-100">
+            Public code mode renders full screen with no PortZen header, navigation, theme wrapper, or generated sections.
+          </div>
+        </Panel>
+
+        <Panel title="HTML">
+          <textarea
+            className={`${inputClass} min-h-[360px] resize-y font-mono leading-6`}
+            spellCheck="false"
+            value={customCode.html}
+            onChange={(event) => update({ html: event.target.value })}
+          />
+        </Panel>
+
+        <Panel title="CSS">
+          <textarea
+            className={`${inputClass} min-h-[360px] resize-y font-mono leading-6`}
+            spellCheck="false"
+            value={customCode.css}
+            onChange={(event) => update({ css: event.target.value })}
+          />
+        </Panel>
+      </div>
+
+      <div className="sticky top-24 h-[calc(100vh-7rem)] overflow-hidden rounded-2xl border border-white/10 bg-white">
+        <CustomCodePortfolio customCode={customCode} preview />
+      </div>
+    </div>
+  );
 }
 
 function Stories({ portfolio, setPortfolio }) {
@@ -362,9 +416,23 @@ function Stories({ portfolio, setPortfolio }) {
 }
 
 function Settings({ portfolio, setPortfolio, availability }) {
+  async function syncGitHub() {
+    try {
+      const profile = await fetchGitHubProfile(portfolio.githubUsername || portfolio.socials?.github?.split("/").filter(Boolean).pop());
+      setPortfolio((prev) => ({ ...prev, github: profile, githubUsername: profile.username }));
+      toast.success("GitHub data synced");
+    } catch (error) {
+      toast.error(error.message);
+    }
+  }
   return (
     <Panel title="Settings">
       <ProfileEditor portfolio={portfolio} setPortfolio={setPortfolio} availability={availability} />
+      <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+        <h3 className="font-bold">GitHub Integration</h3>
+        <p className="mt-2 text-sm text-zinc-400">Fetches public profile, latest repos, followers, and stars from the GitHub public API.</p>
+        <Button className="mt-4" variant="secondary" onClick={syncGitHub}>Sync GitHub</Button>
+      </div>
       <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
         <h3 className="font-bold">Premium placeholders</h3>
         <p className="mt-2 text-sm text-zinc-400">Resume PDF export, AI bio suggestions, favicon upload, portfolio cloning, bookmarking, and share tracking are modeled for backend integration.</p>

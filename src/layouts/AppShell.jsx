@@ -8,6 +8,7 @@ const links = [
   ["Projects", "/dashboard/projects"],
   ["Experience", "/dashboard/experience"],
   ["Templates", "/dashboard/templates"],
+  ["Code Your Own Folio", "/dashboard/code"],
   ["Stories", "/dashboard/stories"],
   ["Settings", "/dashboard/settings"],
 ];

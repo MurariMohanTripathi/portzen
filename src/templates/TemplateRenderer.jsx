@@ -1,7 +1,6 @@
-import ModernTemplate from "./ModernTemplate";
-import MinimalTemplate from "./MinimalTemplate";
-import GlassTemplate from "./GlassTemplate";
 import { defaultPortfolio } from "../data/portfolioSchema";
+import ThemeRenderer from "../components/portfolio/ThemeRenderer";
+import { normalizeSections } from "../utils/sections";
 
 export default function TemplateRenderer({ portfolio }) {
   const source = portfolio || defaultPortfolio;
@@ -9,16 +8,9 @@ export default function TemplateRenderer({ portfolio }) {
     ...defaultPortfolio,
     ...source,
     theme: { ...defaultPortfolio.theme, ...source.theme },
+    sections: normalizeSections(source.sections || defaultPortfolio.sections),
     accentColor: source.theme?.accentColor || source.accentColor || defaultPortfolio.accentColor,
   };
 
-  switch (resolved.template) {
-    case "minimal":
-      return <MinimalTemplate portfolio={resolved} />;
-    case "glass":
-      return <GlassTemplate portfolio={resolved} />;
-    case "modern":
-    default:
-      return <ModernTemplate portfolio={resolved} />;
-  }
+  return <ThemeRenderer portfolio={resolved} />;
 }

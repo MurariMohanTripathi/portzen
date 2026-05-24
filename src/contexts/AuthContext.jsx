@@ -9,16 +9,30 @@ import {
   signOut,
 } from "firebase/auth";
 import { auth, googleProvider } from "../firebase/firebase";
+import { db } from "../firebase/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [role, setRole] = useState("user");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+      if (!currentUser) {
+        setRole("user");
+        setLoading(false);
+        return;
+      }
+      try {
+        const snapshot = await getDoc(doc(db, "users", currentUser.uid));
+        setRole(snapshot.exists() ? snapshot.data().role || "user" : "user");
+      } catch {
+        setRole("user");
+      }
       setLoading(false);
     });
     return unsubscribe;
@@ -32,10 +46,10 @@ export function AuthProvider({ children }) {
     loginWithGoogle: () => signInWithPopup(auth, googleProvider),
     resetPassword: (email) => sendPasswordResetEmail(auth, email),
     logout: () => signOut(auth),
-    isAdmin:
+    isAdmin: role === "admin" ||
       user?.email === import.meta.env.VITE_SUPERADMIN_EMAIL ||
       (import.meta.env.VITE_SUPERADMIN_EMAILS || "").split(",").map((item) => item.trim()).includes(user?.email),
-  }), [user, loading]);
+  }), [user, loading, role]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
