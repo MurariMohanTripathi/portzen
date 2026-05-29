@@ -1,6 +1,8 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import Button from "../components/ui/Button";
+import { getPortfolioByUid } from "../services/portfolioService";
 
 const links = [
   ["Overview", "/dashboard/overview"],
@@ -16,6 +18,18 @@ const links = [
 export default function AppShell() {
   const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const [publicUsername, setPublicUsername] = useState("");
+
+  useEffect(() => {
+    if (!user?.uid) return undefined;
+    let active = true;
+    getPortfolioByUid(user.uid).then((portfolio) => {
+      if (active) setPublicUsername(portfolio.username || "");
+    }).catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [user?.uid]);
 
   async function handleLogout() {
     await logout();
@@ -48,7 +62,7 @@ export default function AppShell() {
               <p className="font-semibold">{user?.email}</p>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="secondary" onClick={() => navigator.clipboard?.writeText("https://portzen.in/murari")}>Copy Link</Button>
+              <Button variant="secondary" disabled={!publicUsername} onClick={() => navigator.clipboard?.writeText(`${window.location.origin}/${publicUsername}`)}>Copy Link</Button>
               <Button variant="danger" onClick={handleLogout}>Logout</Button>
             </div>
           </header>

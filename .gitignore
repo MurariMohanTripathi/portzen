@@ -1,4 +1,4 @@
-# Logs
+# Logs and runtime output
 logs
 *.log
 npm-debug.log*
@@ -6,21 +6,59 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+vite-dev*.log
 
-node_modules
+# Dependencies
+node_modules/
+server/node_modules/
+
+# Build output and generated assets
 dist
 dist-ssr
+build/
+.vite/
+coverage/
+.nyc_output/
+n/
+
+# Local environment and secrets
 *.local
 .env
+.env.*
 server/.env
+server/.env.*
 !.env.example
 !server/.env.example
+
+# Firebase and cloud credentials
+.firebase/
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
+serviceAccount*.json
+*-service-account*.json
+*firebase-adminsdk*.json
+google-application-credentials*.json
+
+# Private certificates and keys
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+
+# Test and cache output
+.cache/
+.parcel-cache/
+.turbo/
+.eslintcache
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store
+Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj

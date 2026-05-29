@@ -1,20 +1,8 @@
+import { sectionTypeIds } from "../portfolio/sectionRegistry.jsx";
+
 export const reservedUsernames = ["admin", "dashboard", "login", "signup", "api", "settings", "portfolio", "support"];
 
-export const sectionTypes = [
-  "Hero",
-  "About",
-  "Projects",
-  "Skills",
-  "Experience",
-  "Certifications",
-  "Achievements",
-  "Education",
-  "Contact",
-  "Social Links",
-  "GitHub Stats",
-  "User Stories",
-  "CustomHTML",
-];
+export const sectionTypes = sectionTypeIds;
 
 export const templates = [
   {
@@ -41,18 +29,18 @@ export const themePresets = [
   {
     id: "midnight",
     name: "Midnight",
-    accentColor: "#22d3ee",
-    backgroundColor: "#09090b",
+    accentColor: "#38bdf8",
+    backgroundColor: "#080a12",
     textColor: "#f8fafc",
-    surfaceColor: "#18181b",
+    surfaceColor: "#141824",
     fontFamily: "Inter, system-ui, sans-serif",
-    cornerRadius: 16,
+    cornerRadius: 14,
   },
   {
     id: "studio",
     name: "Studio",
     accentColor: "#2563eb",
-    backgroundColor: "#f8fafc",
+    backgroundColor: "#f6f7fb",
     textColor: "#111827",
     surfaceColor: "#ffffff",
     fontFamily: "Inter, system-ui, sans-serif",
@@ -61,18 +49,18 @@ export const themePresets = [
   {
     id: "emerald",
     name: "Emerald",
-    accentColor: "#10b981",
-    backgroundColor: "#071311",
+    accentColor: "#34d399",
+    backgroundColor: "#07110f",
     textColor: "#ecfdf5",
-    surfaceColor: "#10201c",
+    surfaceColor: "#10231e",
     fontFamily: "Georgia, serif",
-    cornerRadius: 22,
+    cornerRadius: 16,
   },
   {
     id: "editorial",
     name: "Editorial",
-    accentColor: "#e11d48",
-    backgroundColor: "#fff7ed",
+    accentColor: "#be123c",
+    backgroundColor: "#fffaf5",
     textColor: "#1c1917",
     surfaceColor: "#ffffff",
     fontFamily: "Georgia, serif",
@@ -90,6 +78,16 @@ export const defaultPortfolio = {
   theme: themePresets[0],
   profileImage: "",
   heroBanner: "",
+  display: {
+    showName: true,
+    showHeadline: true,
+    showBio: true,
+    showAvatar: true,
+    showLocation: true,
+    showHeroCta: true,
+    showSocialsInHero: true,
+    showUsername: false,
+  },
   bio: "",
   summary:
     "",
@@ -98,10 +96,27 @@ export const defaultPortfolio = {
     linkedin: "",
     website: "",
     email: "",
+    resume: "",
   },
+  links: [
+    { id: "github", label: "GitHub", value: "" },
+    { id: "linkedin", label: "LinkedIn", value: "" },
+  ],
+  facts: [
+    { id: "location", label: "Location", value: "India" },
+  ],
   githubUsername: "",
   customCode: {
     enabled: false,
+    activeBlockId: "starter",
+    blocks: [
+      {
+        id: "starter",
+        name: "Starter Page",
+        html: "<main class=\"folio\">\n  <section>\n    <p class=\"eyebrow\">Custom portfolio</p>\n    <h1>Your Name</h1>\n    <p>Build a fully personalized portfolio with your own HTML and CSS.</p>\n  </section>\n</main>",
+        css: "body {\n  margin: 0;\n  min-height: 100vh;\n  background: #050505;\n  color: #f8fafc;\n  font-family: Inter, system-ui, sans-serif;\n}\n\n.folio {\n  min-height: 100vh;\n  display: grid;\n  place-items: center;\n  padding: 48px;\n}\n\nsection {\n  max-width: 760px;\n}\n\n.eyebrow {\n  color: #22d3ee;\n  text-transform: uppercase;\n  letter-spacing: 0.18em;\n}\n\nh1 {\n  font-size: clamp(48px, 10vw, 120px);\n  line-height: 0.95;\n  margin: 16px 0;\n}\n\np {\n  font-size: 20px;\n  line-height: 1.7;\n}",
+      },
+    ],
     html: "<main class=\"folio\">\n  <section>\n    <p class=\"eyebrow\">Custom portfolio</p>\n    <h1>Your Name</h1>\n    <p>Build a fully personalized portfolio with your own HTML and CSS.</p>\n  </section>\n</main>",
     css: "body {\n  margin: 0;\n  min-height: 100vh;\n  background: #050505;\n  color: #f8fafc;\n  font-family: Inter, system-ui, sans-serif;\n}\n\n.folio {\n  min-height: 100vh;\n  display: grid;\n  place-items: center;\n  padding: 48px;\n}\n\nsection {\n  max-width: 760px;\n}\n\n.eyebrow {\n  color: #22d3ee;\n  text-transform: uppercase;\n  letter-spacing: 0.18em;\n}\n\nh1 {\n  font-size: clamp(48px, 10vw, 120px);\n  line-height: 0.95;\n  margin: 16px 0;\n}\n\np {\n  font-size: 20px;\n  line-height: 1.7;\n}",
   },

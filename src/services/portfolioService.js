@@ -182,9 +182,20 @@ function normalizePortfolio(data = {}) {
     ...data,
     analytics: { ...defaultPortfolio.analytics, ...data.analytics },
     socials: { ...defaultPortfolio.socials, ...data.socials },
+    links: normalizeCustomList(data.links || defaultPortfolio.links),
+    facts: normalizeCustomList(data.facts || defaultPortfolio.facts),
     theme: { ...defaultPortfolio.theme, ...data.theme },
+    display: { ...defaultPortfolio.display, ...data.display },
     customCode: { ...defaultPortfolio.customCode, ...data.customCode },
     sections: normalizeSections(data.sections || defaultPortfolio.sections),
     stories: data.stories || defaultPortfolio.stories,
   };
+}
+
+function normalizeCustomList(items = []) {
+  return items.filter(Boolean).map((item, index) => ({
+    id: item.id || `item-${index}`,
+    label: item.label || "",
+    value: item.value || "",
+  }));
 }
