@@ -6,6 +6,7 @@ import { getPortfolioByUsername, incrementPortfolioView } from "../services/port
 import LoadingScreen from "../components/ui/LoadingScreen";
 import { applyPortfolioSeo } from "../utils/seo";
 import CustomCodePortfolio from "../components/portfolio/CustomCodePortfolio";
+import SiteFooter from "../components/layout/SiteFooter";
 
 export default function PortfolioPage() {
   const { username } = useParams();
@@ -30,7 +31,14 @@ export default function PortfolioPage() {
 
   if (loading) return <LoadingScreen />;
   if (portfolio?.banned) return <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-6 text-center text-white">This portfolio is unavailable.</div>;
-  if (portfolio?.customCode?.enabled) return <CustomCodePortfolio customCode={portfolio.customCode} />;
+  if (portfolio?.customCode?.enabled) {
+    return (
+      <main className="min-h-screen bg-zinc-950">
+        <CustomCodePortfolio customCode={portfolio.customCode} />
+        <SiteFooter variant="detailed" portfolio={portfolio} />
+      </main>
+    );
+  }
   return <TemplateRenderer portfolio={portfolio} />;
 }
 

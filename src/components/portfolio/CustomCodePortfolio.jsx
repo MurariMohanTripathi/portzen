@@ -27,7 +27,7 @@ export default function CustomCodePortfolio({ customCode, preview = false }) {
   return (
     <iframe
       title="Custom coded portfolio"
-      className={preview ? "h-full w-full bg-white" : "fixed inset-0 h-screen w-screen border-0 bg-white"}
+      className={preview ? "h-full w-full bg-white" : "min-h-screen w-full border-0 bg-white"}
       sandbox=""
       srcDoc={buildCustomCodeDocument(customCode)}
     />

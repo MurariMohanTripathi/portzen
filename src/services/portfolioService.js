@@ -149,6 +149,9 @@ export async function listAdminUsers() {
 }
 
 export async function deleteUserRecord(uid) {
+  const portfolioSnapshot = await getDoc(doc(portfolios, uid));
+  const username = portfolioSnapshot.exists() ? portfolioSnapshot.data().username : "";
+  if (username) await deleteDoc(doc(usernames, username));
   await deleteDoc(doc(users, uid));
   await deleteDoc(doc(portfolios, uid));
 }
@@ -172,7 +175,7 @@ export async function updateAdminUser(uid, updates) {
       if (previousUsername && previousUsername !== nextUsername) transaction.delete(doc(usernames, previousUsername));
     }
     transaction.set(userRef, { ...updates, updatedAt: serverTimestamp() }, { merge: true });
-    transaction.set(portfolioRef, updates, { merge: true });
+    transaction.set(portfolioRef, { ...updates, updatedAt: serverTimestamp() }, { merge: true });
   });
 }
 

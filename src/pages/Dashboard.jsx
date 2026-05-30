@@ -17,6 +17,7 @@ import EditableSection from "../components/portfolio/EditableSection";
 import DynamicFieldRenderer from "../components/portfolio/DynamicFieldRenderer";
 import CustomCodePortfolio from "../components/portfolio/CustomCodePortfolio";
 import CustomFieldList from "../components/portfolio/CustomFieldList";
+import PageSeo from "../components/seo/PageSeo";
 
 export default function Dashboard({ view }) {
   const { user } = useAuth();
@@ -126,6 +127,11 @@ export default function Dashboard({ view }) {
 
   return (
     <div className="space-y-6">
+      <PageSeo
+        title={`${view[0].toUpperCase()}${view.slice(1)} | PortZen Dashboard`}
+        description="Edit your portfolio content, visual theme, dynamic sections, projects, stories, templates, and publishing settings."
+        noIndex
+      />
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
           <h1 className="text-3xl font-black capitalize">{view}</h1>
@@ -175,7 +181,7 @@ function SaveIndicator({ dirty, saveStatus }) {
     saved: "Saved",
     error: "Save failed",
   };
-  return <span className="hidden rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-300 md:inline-flex">{labels[saveStatus] || labels.idle}</span>;
+  return <span className="hidden rounded-lg border border-white/10 bg-zinc-900/70 px-3 py-2 text-sm text-zinc-300 shadow-sm shadow-black/10 md:inline-flex">{labels[saveStatus] || labels.idle}</span>;
 }
 
 function Overview({ portfolio, completion, savedUsername, dirty }) {
@@ -189,14 +195,14 @@ function Overview({ portfolio, completion, savedUsername, dirty }) {
     <div className="grid gap-5 lg:grid-cols-[1fr_420px]">
       <div className="grid gap-4 md:grid-cols-4">
         {stats.map(([label, value]) => <Metric key={label} label={label} value={value} />)}
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-5 md:col-span-4">
+        <div className="rounded-lg border border-white/10 bg-zinc-900/70 p-5 shadow-xl shadow-black/10 md:col-span-4">
           <h2 className="text-xl font-bold">Launch checklist</h2>
           <div className="mt-4 h-3 rounded-full bg-zinc-900"><div className="h-full rounded-full bg-cyan-400" style={{ width: `${completion}%` }} /></div>
           <p className="mt-3 text-sm text-zinc-400">{completion}% complete. Add projects, stories, social links, and a resume before sharing.</p>
         </div>
         <PublishPanel portfolio={portfolio} savedUsername={savedUsername} dirty={dirty} />
       </div>
-      <div className="h-[720px] overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+      <div className="h-[720px] overflow-hidden rounded-lg border border-white/10 bg-zinc-900/70 shadow-2xl shadow-black/20">
         <div className="origin-top scale-[0.55] md:scale-[0.58]"><TemplateRenderer portfolio={portfolio} /></div>
       </div>
     </div>
@@ -214,7 +220,7 @@ function PublishPanel({ portfolio, savedUsername, dirty }) {
   ];
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-5 md:col-span-4">
+    <div className="rounded-lg border border-white/10 bg-zinc-900/70 p-5 shadow-xl shadow-black/10 md:col-span-4">
       <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
         <div>
           <h2 className="text-xl font-bold">Publish center</h2>
@@ -227,7 +233,7 @@ function PublishPanel({ portfolio, savedUsername, dirty }) {
       </div>
       <div className="mt-4 grid gap-2 md:grid-cols-5">
         {checks.map(([label, done]) => (
-          <span key={label} className={`rounded-xl border px-3 py-2 text-xs ${done ? "border-emerald-300/30 bg-emerald-300/10 text-emerald-100" : "border-white/10 bg-zinc-950/60 text-zinc-400"}`}>
+          <span key={label} className={`rounded-lg border px-3 py-2 text-xs ${done ? "border-emerald-300/30 bg-emerald-300/10 text-emerald-100" : "border-white/10 bg-zinc-950/60 text-zinc-400"}`}>
             {done ? "Done" : "Todo"}: {label}
           </span>
         ))}
@@ -247,7 +253,7 @@ function Builder({ portfolio, setPortfolio, availability }) {
         <ThemeDesigner portfolio={portfolio} setPortfolio={setPortfolio} />
         <SectionManager portfolio={portfolio} setPortfolio={setPortfolio} />
       </div>
-      <div className="sticky top-24 h-[calc(100vh-7rem)] overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+      <div className="sticky top-24 h-[calc(100vh-7rem)] overflow-hidden rounded-lg border border-white/10 bg-zinc-900/70 shadow-2xl shadow-black/20">
         <PreviewToolbar value={previewDevice} onChange={setPreviewDevice} />
         <div className="h-[calc(100%-57px)] overflow-auto p-3">
           <div className={`mx-auto min-h-full bg-zinc-950 transition-all ${previewWidths[previewDevice]}`}>
@@ -263,9 +269,9 @@ function PreviewToolbar({ value, onChange }) {
   return (
     <div className="flex items-center justify-between border-b border-white/10 bg-zinc-950/80 px-3 py-2">
       <span className="text-sm font-semibold text-zinc-300">Live preview</span>
-      <div className="flex rounded-xl border border-white/10 bg-black/20 p-1">
+      <div className="flex rounded-lg border border-white/10 bg-black/20 p-1">
         {["desktop", "tablet", "mobile"].map((device) => (
-          <button key={device} type="button" className={`rounded-lg px-3 py-1.5 text-xs capitalize ${value === device ? "bg-cyan-300 text-zinc-950" : "text-zinc-300 hover:bg-white/5"}`} onClick={() => onChange(device)}>
+          <button key={device} type="button" className={`rounded-md px-3 py-1.5 text-xs capitalize transition ${value === device ? "bg-cyan-300 text-zinc-950" : "text-zinc-300 hover:bg-white/5"}`} onClick={() => onChange(device)}>
             {device}
           </button>
         ))}
@@ -314,7 +320,7 @@ function ProfileEditor({ portfolio, setPortfolio, availability }) {
           { key: "value", label: "Value", placeholder: "India" },
         ]}
       />
-      <div className="rounded-xl border border-white/10 bg-zinc-950/60 p-4">
+      <div className="rounded-lg border border-white/10 bg-zinc-950/60 p-4">
         <h3 className="font-bold">Visibility</h3>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {Object.entries({
@@ -327,7 +333,7 @@ function ProfileEditor({ portfolio, setPortfolio, availability }) {
             showSocialsInHero: "Socials in hero",
             showUsername: "Username label",
           }).map(([key, label]) => (
-            <label key={key} className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-200">
+            <label key={key} className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-200">
               <span>{label}</span>
               <input className="h-5 w-5 accent-cyan-300" type="checkbox" checked={Boolean(display[key])} onChange={(event) => updateDisplay(key, event.target.checked)} />
             </label>
@@ -362,7 +368,7 @@ function ThemeDesigner({ portfolio, setPortfolio }) {
             key={preset.id}
             type="button"
             onClick={() => updateTheme(preset)}
-            className={`rounded-xl border p-3 text-left transition ${theme.name === preset.name ? "border-cyan-300 bg-cyan-300/10" : "border-white/10 bg-zinc-950/60 hover:border-white/30"}`}
+            className={`rounded-lg border p-3 text-left transition ${theme.name === preset.name ? "border-cyan-300 bg-cyan-300/10 shadow-lg shadow-cyan-500/10" : "border-white/10 bg-zinc-950/60 hover:border-white/30"}`}
           >
             <div className="flex gap-2">
               {[preset.backgroundColor, preset.surfaceColor, preset.accentColor, preset.textColor].map((color) => (

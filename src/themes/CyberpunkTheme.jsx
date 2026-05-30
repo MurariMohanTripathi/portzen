@@ -1,4 +1,5 @@
 import PortfolioRenderer from "../components/portfolio/PortfolioRenderer";
+import SiteFooter from "../components/layout/SiteFooter";
 import { normalizeTheme, withAlpha } from "../utils/themeColors";
 
 export default function CyberpunkTheme({ portfolio }) {
@@ -21,6 +22,7 @@ export default function CyberpunkTheme({ portfolio }) {
       <div className="relative mx-auto max-w-6xl px-5 py-10">
         <PortfolioRenderer portfolio={portfolio} variant="dark" />
       </div>
+      <SiteFooter variant="detailed" portfolio={portfolio} />
     </main>
   );
 }

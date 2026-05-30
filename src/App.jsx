@@ -44,9 +44,9 @@ function App() {
               </Route>
             </Route>
 
-            <Route element={<AdminRoute />}>
-              <Route path="/admin" element={<AdminLayout />}>
-                <Route index element={<Navigate to="/admin/users" replace />} />
+            <Route path="/admin/:adminUsername" element={<AdminRoute />}>
+              <Route element={<AdminLayout />}>
+                <Route index element={<AdminDashboard view="users" />} />
                 <Route path="users" element={<AdminDashboard view="users" />} />
                 <Route path="analytics" element={<AdminDashboard view="analytics" />} />
                 <Route path="templates" element={<AdminDashboard view="templates" />} />

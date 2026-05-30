@@ -1,4 +1,5 @@
 import PortfolioRenderer from "../components/portfolio/PortfolioRenderer";
+import SiteFooter from "../components/layout/SiteFooter";
 import { normalizeTheme, withAlpha } from "../utils/themeColors";
 
 export default function GlassTheme({ portfolio }) {
@@ -20,6 +21,7 @@ export default function GlassTheme({ portfolio }) {
           <PortfolioRenderer portfolio={portfolio} variant="dark" />
         </div>
       </div>
+      <SiteFooter variant="detailed" portfolio={portfolio} />
     </main>
   );
 }

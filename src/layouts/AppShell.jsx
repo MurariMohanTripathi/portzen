@@ -3,6 +3,10 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import Button from "../components/ui/Button";
 import { getPortfolioByUid } from "../services/portfolioService";
+import BrandLogo from "../components/brand/BrandLogo";
+import PageSeo from "../components/seo/PageSeo";
+import SiteFooter from "../components/layout/SiteFooter";
+import { pageSeo } from "../utils/seo";
 
 const links = [
   ["Overview", "/dashboard/overview"],
@@ -16,7 +20,7 @@ const links = [
 ];
 
 export default function AppShell() {
-  const { user, logout, isAdmin } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [publicUsername, setPublicUsername] = useState("");
 
@@ -38,25 +42,25 @@ export default function AppShell() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
-      <div className="fixed inset-0 bg-[radial-gradient(circle_at_0%_0%,rgba(34,211,238,0.18),transparent_28%),radial-gradient(circle_at_100%_0%,rgba(168,85,247,0.14),transparent_26%)]" />
+      <PageSeo {...pageSeo.dashboard} />
+      <div className="fixed inset-0 bg-[linear-gradient(135deg,rgba(8,47,73,0.56),rgba(9,9,11,0.96)_40%,rgba(76,29,49,0.38))]" />
       <div className="relative grid min-h-screen lg:grid-cols-[260px_1fr]">
-        <aside className="border-r border-white/10 bg-zinc-950/70 p-5 backdrop-blur-xl">
-          <div className="mb-8 text-2xl font-black">Port<span className="text-cyan-300">Zen</span></div>
+        <aside className="border-r border-white/10 bg-zinc-950/75 p-5 shadow-2xl shadow-black/20 backdrop-blur-xl">
+          <div className="mb-8"><BrandLogo /></div>
           <nav className="grid gap-2">
             {links.map(([label, href]) => (
               <NavLink
                 key={href}
                 to={href}
-                className={({ isActive }) => `rounded-xl px-4 py-3 text-sm transition ${isActive ? "bg-cyan-400 text-zinc-950" : "text-zinc-300 hover:bg-white/5"}`}
+                className={({ isActive }) => `rounded-lg px-4 py-3 text-sm transition ${isActive ? "bg-cyan-300 text-zinc-950 shadow-lg shadow-cyan-500/15" : "text-zinc-300 hover:bg-white/5 hover:text-white"}`}
               >
                 {label}
               </NavLink>
             ))}
-            {isAdmin ? <NavLink to="/admin/users" className="rounded-xl px-4 py-3 text-sm text-zinc-300 hover:bg-white/5">Admin</NavLink> : null}
           </nav>
         </aside>
         <section>
-          <header className="sticky top-0 z-10 flex items-center justify-between border-b border-white/10 bg-zinc-950/70 px-5 py-4 backdrop-blur-xl">
+          <header className="sticky top-0 z-10 flex items-center justify-between border-b border-white/10 bg-zinc-950/75 px-5 py-4 shadow-lg shadow-black/10 backdrop-blur-xl">
             <div>
               <p className="text-sm text-zinc-500">Workspace</p>
               <p className="font-semibold">{user?.email}</p>
@@ -69,6 +73,7 @@ export default function AppShell() {
           <main className="p-5 lg:p-8">
             <Outlet />
           </main>
+          <SiteFooter variant="compact" className="border-l border-white/10 lg:ml-0" />
         </section>
       </div>
     </div>

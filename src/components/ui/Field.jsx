@@ -9,4 +9,4 @@ export default function Field({ label, hint, children }) {
 }
 
 export const inputClass =
-  "w-full rounded-xl border border-white/10 bg-zinc-950/70 px-4 py-3 text-sm text-white outline-none transition placeholder:text-zinc-600 focus:border-cyan-300/70";
+  "w-full rounded-lg border border-white/10 bg-zinc-950/75 px-4 py-3 text-sm text-white shadow-sm shadow-black/10 outline-none transition duration-200 placeholder:text-zinc-600 focus:border-cyan-300/70 focus:bg-zinc-950";

@@ -5,6 +5,7 @@ import { useAuth } from "../contexts/AuthContext";
 import Button from "../components/ui/Button";
 import Field, { inputClass } from "../components/ui/Field";
 import { AuthCard } from "./Login";
+import { pageSeo } from "../utils/seo";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -37,7 +38,7 @@ export default function Signup() {
     }
   }
 
-  return <AuthCard title="Create your account" subtitle="Claim a custom portfolio URL and start editing.">
+  return <AuthCard seo={pageSeo.signup} title="Create your account" subtitle="Claim a custom portfolio URL and start editing.">
     <Button className="w-full" variant="secondary" onClick={google}>Continue with Google</Button>
     <form onSubmit={submit} className="mt-6 space-y-4">
       <Field label="Email"><input className={inputClass} value={email} onChange={(e) => setEmail(e.target.value)} type="email" required /></Field>
