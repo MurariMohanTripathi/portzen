@@ -24,14 +24,14 @@ export default function CustomFieldList({
   }
 
   return (
-    <div className="rounded-xl border border-white/10 bg-zinc-950/55 p-4">
-      <div className="flex items-center justify-between gap-3">
+    <div className="rounded-lg border border-white/10 bg-zinc-950/55 p-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="font-bold">{title}</h3>
-        <Button variant="secondary" onClick={addItem}>{addLabel}</Button>
+        <Button className="w-full sm:w-auto" variant="secondary" onClick={addItem}>{addLabel}</Button>
       </div>
       <div className="mt-4 space-y-3">
         {items.length ? items.map((item, index) => (
-          <div key={item.id || index} className="rounded-xl border border-white/10 bg-black/20 p-3">
+          <div key={item.id || index} className="rounded-lg border border-white/10 bg-black/20 p-3">
             <div className="grid gap-3 md:grid-cols-2">
               {fields.map((field) => (
                 <Field key={field.key} label={field.label}>

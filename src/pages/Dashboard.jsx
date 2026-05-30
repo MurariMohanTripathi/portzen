@@ -126,21 +126,21 @@ export default function Dashboard({ view }) {
   if (loading) return <LoadingScreen />;
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6">
       <PageSeo
         title={`${view[0].toUpperCase()}${view.slice(1)} | PortZen Dashboard`}
         description="Edit your portfolio content, visual theme, dynamic sections, projects, stories, templates, and publishing settings."
         noIndex
       />
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-        <div>
-          <h1 className="text-3xl font-black capitalize">{view}</h1>
-          <p className="mt-1 text-zinc-400">Custom URL: portzen.in/{portfolio.username || "username"}</p>
+        <div className="min-w-0">
+          <h1 className="text-2xl font-black capitalize sm:text-3xl">{view}</h1>
+          <p className="mt-1 break-words text-sm text-zinc-400 sm:text-base">Custom URL: portzen.in/{portfolio.username || "username"}</p>
         </div>
-        <div className="flex gap-3">
-          <Button variant="secondary" disabled={!savedUsername || portfolio.username !== savedUsername} onClick={openPublicView}>Public View</Button>
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:gap-3">
+          <Button className="w-full sm:w-auto" variant="secondary" disabled={!savedUsername || portfolio.username !== savedUsername} onClick={openPublicView}>Public View</Button>
           <SaveIndicator dirty={dirty} saveStatus={saveStatus} />
-          <Button onClick={() => save()}>Save Changes</Button>
+          <Button className="w-full sm:w-auto" onClick={() => save()}>Save Changes</Button>
         </div>
       </div>
 
@@ -181,7 +181,7 @@ function SaveIndicator({ dirty, saveStatus }) {
     saved: "Saved",
     error: "Save failed",
   };
-  return <span className="hidden rounded-lg border border-white/10 bg-zinc-900/70 px-3 py-2 text-sm text-zinc-300 shadow-sm shadow-black/10 md:inline-flex">{labels[saveStatus] || labels.idle}</span>;
+  return <span className="col-span-2 inline-flex items-center justify-center rounded-lg border border-white/10 bg-zinc-900/70 px-3 py-2 text-sm text-zinc-300 shadow-sm shadow-black/10 sm:col-span-1">{labels[saveStatus] || labels.idle}</span>;
 }
 
 function Overview({ portfolio, completion, savedUsername, dirty }) {
@@ -202,7 +202,7 @@ function Overview({ portfolio, completion, savedUsername, dirty }) {
         </div>
         <PublishPanel portfolio={portfolio} savedUsername={savedUsername} dirty={dirty} />
       </div>
-      <div className="h-[720px] overflow-hidden rounded-lg border border-white/10 bg-zinc-900/70 shadow-2xl shadow-black/20">
+      <div className="hidden h-[720px] overflow-hidden rounded-lg border border-white/10 bg-zinc-900/70 shadow-2xl shadow-black/20 lg:block">
         <div className="origin-top scale-[0.55] md:scale-[0.58]"><TemplateRenderer portfolio={portfolio} /></div>
       </div>
     </div>
@@ -222,13 +222,13 @@ function PublishPanel({ portfolio, savedUsername, dirty }) {
   return (
     <div className="rounded-lg border border-white/10 bg-zinc-900/70 p-5 shadow-xl shadow-black/10 md:col-span-4">
       <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
-        <div>
+        <div className="min-w-0">
           <h2 className="text-xl font-bold">Publish center</h2>
-          <p className="mt-1 text-sm text-zinc-400">{url || "Choose and save a username to unlock your public link."}</p>
+          <p className="mt-1 break-words text-sm text-zinc-400">{url || "Choose and save a username to unlock your public link."}</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="secondary" disabled={!url} onClick={() => navigator.clipboard?.writeText(url)}>Copy Link</Button>
-          <Button disabled={!url || dirty} onClick={() => window.open(`/${savedUsername}`, "_blank")}>Open</Button>
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0">
+          <Button className="w-full sm:w-auto" variant="secondary" disabled={!url} onClick={() => navigator.clipboard?.writeText(url)}>Copy Link</Button>
+          <Button className="w-full sm:w-auto" disabled={!url || dirty} onClick={() => window.open(`/${savedUsername}`, "_blank")}>Open</Button>
         </div>
       </div>
       <div className="mt-4 grid gap-2 md:grid-cols-5">
@@ -247,13 +247,13 @@ function Builder({ portfolio, setPortfolio, availability }) {
   const previewWidths = { mobile: "max-w-[390px]", tablet: "max-w-[760px]", desktop: "max-w-none" };
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[520px_1fr]">
-      <div className="space-y-5">
+    <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,520px)_minmax(0,1fr)]">
+      <div className="min-w-0 space-y-5">
         <ProfileEditor portfolio={portfolio} setPortfolio={setPortfolio} availability={availability} />
         <ThemeDesigner portfolio={portfolio} setPortfolio={setPortfolio} />
         <SectionManager portfolio={portfolio} setPortfolio={setPortfolio} />
       </div>
-      <div className="sticky top-24 h-[calc(100vh-7rem)] overflow-hidden rounded-lg border border-white/10 bg-zinc-900/70 shadow-2xl shadow-black/20">
+      <div className="min-h-[520px] overflow-hidden rounded-lg border border-white/10 bg-zinc-900/70 shadow-2xl shadow-black/20 xl:sticky xl:top-24 xl:h-[calc(100vh-7rem)]">
         <PreviewToolbar value={previewDevice} onChange={setPreviewDevice} />
         <div className="h-[calc(100%-57px)] overflow-auto p-3">
           <div className={`mx-auto min-h-full bg-zinc-950 transition-all ${previewWidths[previewDevice]}`}>
@@ -267,9 +267,9 @@ function Builder({ portfolio, setPortfolio, availability }) {
 
 function PreviewToolbar({ value, onChange }) {
   return (
-    <div className="flex items-center justify-between border-b border-white/10 bg-zinc-950/80 px-3 py-2">
+    <div className="flex flex-col gap-2 border-b border-white/10 bg-zinc-950/80 px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
       <span className="text-sm font-semibold text-zinc-300">Live preview</span>
-      <div className="flex rounded-lg border border-white/10 bg-black/20 p-1">
+      <div className="grid grid-cols-3 rounded-lg border border-white/10 bg-black/20 p-1 sm:flex">
         {["desktop", "tablet", "mobile"].map((device) => (
           <button key={device} type="button" className={`rounded-md px-3 py-1.5 text-xs capitalize transition ${value === device ? "bg-cyan-300 text-zinc-950" : "text-zinc-300 hover:bg-white/5"}`} onClick={() => onChange(device)}>
             {device}
@@ -456,7 +456,7 @@ function SectionManager({ portfolio, setPortfolio }) {
   const sections = normalizeSections(portfolio.sections);
   return (
     <Panel title="Dynamic Sections">
-      <div className="flex flex-wrap gap-2">{sectionTypes.map((type) => <Button key={type} variant="secondary" onClick={() => addSection(type)}>Add {type}</Button>)}</div>
+      <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">{sectionTypes.map((type) => <Button key={type} className="w-full sm:w-auto" variant="secondary" onClick={() => addSection(type)}>Add {type}</Button>)}</div>
       <div className="mt-5 space-y-3">
         <DragDropContainer items={sections} onReorder={reorder}>
           {sections.map((section) => (
@@ -521,10 +521,10 @@ function CollectionEditor({ title, items, add, updateItems, fields, uid }) {
     update(index, "coverImage", url);
   }
   return (
-    <Panel title={title} action={<Button onClick={add}>Add {title.slice(0, -1)}</Button>}>
+    <Panel title={title} action={<Button className="w-full sm:w-auto" onClick={add}>Add {title.slice(0, -1)}</Button>}>
       <div className="space-y-4">
         {items.map((item, index) => (
-          <div className="rounded-2xl border border-white/10 bg-zinc-950/60 p-4" key={item.id || index}>
+          <div className="rounded-lg border border-white/10 bg-zinc-950/60 p-4" key={item.id || index}>
             <div className="grid gap-3 md:grid-cols-2">
               {fields.map((field) => (
                 <Field key={field} label={field}>
@@ -537,7 +537,7 @@ function CollectionEditor({ title, items, add, updateItems, fields, uid }) {
               ))}
               {title === "Projects" ? <Field label="Upload cover"><input className={inputClass} type="file" accept="image/*" onChange={(e) => upload(index, e.target.files?.[0])} /></Field> : null}
             </div>
-            <Button className="mt-3" variant="danger" onClick={() => updateItems(items.filter((_, itemIndex) => itemIndex !== index))}>Delete</Button>
+            <Button className="mt-3 w-full sm:w-auto" variant="danger" onClick={() => updateItems(items.filter((_, itemIndex) => itemIndex !== index))}>Delete</Button>
           </div>
         ))}
       </div>
@@ -552,7 +552,7 @@ function Templates({ portfolio, setPortfolio }) {
         <button
           key={template.id}
           onClick={() => setPortfolio((prev) => ({ ...prev, template: template.id, accentColor: template.accent, theme: { ...defaultPortfolio.theme, ...prev.theme, accentColor: template.accent } }))}
-          className={`rounded-2xl border p-4 text-left transition ${portfolio.template === template.id ? "border-cyan-300 bg-cyan-300/10" : "border-white/10 bg-white/5 hover:border-white/30"}`}
+          className={`rounded-lg border p-4 text-left transition ${portfolio.template === template.id ? "border-cyan-300 bg-cyan-300/10" : "border-white/10 bg-white/5 hover:border-white/30"}`}
         >
           <TemplateCardPreview template={template} portfolio={portfolio} />
           <h3 className="mt-4 text-xl font-bold">{template.name}</h3>
@@ -646,12 +646,12 @@ function CodeYourOwnFolio({ portfolio, setPortfolio }) {
   };
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,560px)_1fr]">
-      <div className="space-y-5">
+    <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,560px)_minmax(0,1fr)]">
+      <div className="min-w-0 space-y-5">
         <Panel
           title="Code Your Own Folio"
           action={
-            <Button variant={customCode.enabled ? "primary" : "secondary"} onClick={() => update({ enabled: !customCode.enabled })}>
+            <Button className="w-full sm:w-auto" variant={customCode.enabled ? "primary" : "secondary"} onClick={() => update({ enabled: !customCode.enabled })}>
               {customCode.enabled ? "Code Mode On" : "Use Code Mode"}
             </Button>
           }
@@ -664,16 +664,16 @@ function CodeYourOwnFolio({ portfolio, setPortfolio }) {
           </div>
         </Panel>
 
-        <Panel title="Code Blocks" action={<Button variant="secondary" onClick={addBlock}>New Block</Button>}>
-          <div className="grid gap-3 md:grid-cols-[1fr_auto]">
+        <Panel title="Code Blocks" action={<Button className="w-full sm:w-auto" variant="secondary" onClick={addBlock}>New Block</Button>}>
+          <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto]">
             <Field label="Active block">
               <select className={inputClass} value={activeBlock.id} onChange={(event) => selectBlock(event.target.value)}>
                 {customCode.blocks.map((block) => <option key={block.id} value={block.id}>{block.name}</option>)}
               </select>
             </Field>
-            <div className="flex items-end gap-2">
-              <Button variant="secondary" onClick={duplicateBlock}>Duplicate</Button>
-              <Button variant="danger" onClick={deleteBlock}>Delete</Button>
+            <div className="grid grid-cols-2 items-end gap-2 md:flex">
+              <Button className="w-full md:w-auto" variant="secondary" onClick={duplicateBlock}>Duplicate</Button>
+              <Button className="w-full md:w-auto" variant="danger" onClick={deleteBlock}>Delete</Button>
             </div>
           </div>
           <Field label="Block name">
@@ -686,7 +686,7 @@ function CodeYourOwnFolio({ portfolio, setPortfolio }) {
 
         <Panel title="HTML">
           <textarea
-            className={`${inputClass} min-h-[360px] resize-y font-mono leading-6`}
+            className={`${inputClass} min-h-[280px] resize-y font-mono leading-6 sm:min-h-[360px]`}
             spellCheck="false"
             value={activeBlock.html}
             onChange={(event) => updateActiveBlock({ html: event.target.value })}
@@ -695,7 +695,7 @@ function CodeYourOwnFolio({ portfolio, setPortfolio }) {
 
         <Panel title="CSS">
           <textarea
-            className={`${inputClass} min-h-[360px] resize-y font-mono leading-6`}
+            className={`${inputClass} min-h-[280px] resize-y font-mono leading-6 sm:min-h-[360px]`}
             spellCheck="false"
             value={activeBlock.css}
             onChange={(event) => updateActiveBlock({ css: event.target.value })}
@@ -703,7 +703,7 @@ function CodeYourOwnFolio({ portfolio, setPortfolio }) {
         </Panel>
       </div>
 
-      <div className="sticky top-24 h-[calc(100vh-7rem)] overflow-hidden rounded-2xl border border-white/10 bg-white">
+      <div className="min-h-[520px] overflow-hidden rounded-lg border border-white/10 bg-white xl:sticky xl:top-24 xl:h-[calc(100vh-7rem)]">
         <CustomCodePortfolio customCode={{ ...customCode, html: activeBlock.html, css: activeBlock.css }} preview />
       </div>
     </div>
@@ -769,7 +769,7 @@ function Settings({ portfolio, setPortfolio, availability }) {
   return (
     <Panel title="Settings">
       <ProfileEditor portfolio={portfolio} setPortfolio={setPortfolio} availability={availability} />
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+      <div className="rounded-lg border border-white/10 bg-white/5 p-5">
         <h3 className="font-bold">Connected Profiles</h3>
         <p className="mt-2 text-sm text-zinc-400">Attach the profiles you want shown publicly. Empty fields stay hidden.</p>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
@@ -789,7 +789,7 @@ function Settings({ portfolio, setPortfolio, availability }) {
           <Button variant="secondary" onClick={() => toast.success("LinkedIn attached. Add its URL and save changes.")}>Attach LinkedIn</Button>
         </div>
       </div>
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+      <div className="rounded-lg border border-white/10 bg-white/5 p-5">
         <h3 className="font-bold">Premium placeholders</h3>
         <p className="mt-2 text-sm text-zinc-400">Resume PDF export, AI bio suggestions, favicon upload, portfolio cloning, bookmarking, and share tracking are modeled for backend integration.</p>
       </div>
@@ -810,9 +810,9 @@ function findCustomLink(items = [], label) {
 }
 
 function Metric({ label, value }) {
-  return <div className="rounded-2xl border border-white/10 bg-white/5 p-5"><p className="text-sm text-zinc-400">{label}</p><p className="mt-3 text-3xl font-black text-cyan-300">{value}</p></div>;
+  return <div className="rounded-lg border border-white/10 bg-white/5 p-5"><p className="text-sm text-zinc-400">{label}</p><p className="mt-3 text-3xl font-black text-cyan-300">{value}</p></div>;
 }
 
 function Panel({ title, action, children }) {
-  return <section className="rounded-2xl border border-white/10 bg-white/5 p-5"><div className="mb-5 flex items-center justify-between gap-4"><h2 className="text-xl font-bold">{title}</h2>{action}</div><div className="space-y-4">{children}</div></section>;
+  return <section className="min-w-0 rounded-lg border border-white/10 bg-white/5 p-4 sm:p-5"><div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><h2 className="text-lg font-bold sm:text-xl">{title}</h2>{action}</div><div className="min-w-0 space-y-4">{children}</div></section>;
 }
