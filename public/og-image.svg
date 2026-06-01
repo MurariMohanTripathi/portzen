@@ -1,0 +1,21 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#09090B"/>
+  <path d="M0 0H1200V630H0V0Z" fill="url(#bg)"/>
+  <rect x="96" y="86" width="1008" height="458" rx="28" fill="#111827" fill-opacity="0.82" stroke="#67E8F9" stroke-opacity="0.24" stroke-width="2"/>
+  <rect x="144" y="132" width="88" height="88" rx="18" fill="#0F172A" stroke="#67E8F9" stroke-opacity="0.4" stroke-width="2"/>
+  <path d="M171 190V160H194C211 160 222 170 222 185C222 200 211 210 194 210H185V232H171V190ZM185 198H194C203 198 208 193 208 185C208 177 203 172 194 172H185V198Z" fill="#F8FAFC"/>
+  <text x="256" y="177" fill="#F8FAFC" font-family="Inter, Arial, sans-serif" font-size="58" font-weight="800">PortZen</text>
+  <text x="256" y="219" fill="#67E8F9" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="700">Developer Portfolio Builder</text>
+  <text x="144" y="320" fill="#F8FAFC" font-family="Inter, Arial, sans-serif" font-size="62" font-weight="900">Build a portfolio that</text>
+  <text x="144" y="392" fill="#F8FAFC" font-family="Inter, Arial, sans-serif" font-size="62" font-weight="900">shows your work clearly.</text>
+  <text x="144" y="463" fill="#CBD5E1" font-family="Inter, Arial, sans-serif" font-size="30" font-weight="500">Projects, developer blogs, themes, analytics, custom URLs, and SEO-ready pages.</text>
+  <rect x="144" y="500" width="204" height="52" rx="14" fill="#67E8F9"/>
+  <text x="174" y="535" fill="#082F49" font-family="Inter, Arial, sans-serif" font-size="20" font-weight="800">portzen.in</text>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#083344" stop-opacity="0.78"/>
+      <stop offset="0.45" stop-color="#09090B" stop-opacity="0.94"/>
+      <stop offset="1" stop-color="#4C1D95" stop-opacity="0.58"/>
+    </linearGradient>
+  </defs>
+</svg>
