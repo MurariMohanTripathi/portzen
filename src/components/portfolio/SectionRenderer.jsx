@@ -85,19 +85,42 @@ export default function SectionRenderer({ section, portfolio, variant = "dark" }
     case "Achievements":
       return <Timeline section={section} cardClass={cardClass} mutedStyle={mutedStyle} cardMutedStyle={cardMutedStyle} cardStyle={cardStyle} />;
     case "User Stories":
-    case "Blogs":
+    case "Blogs": {
+      if (!portfolio.developerBlog?.enabled) return null;
+      const posts = list(portfolio.stories).slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      const latestPost = posts[0];
       return (
-        <Block title={section.title} mutedStyle={mutedStyle}>
-          <div className="grid gap-4 md:grid-cols-2">
-            {list(portfolio.stories).slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).map((story) => (
-              <article className={`${cardClass} p-5`} style={cardStyle} key={story.id}>
-                <time className="text-xs" style={cardMutedStyle}>{new Date(story.createdAt).toLocaleDateString()}</time>
-                <p className="mt-3 leading-7">{story.text}</p>
-              </article>
-            ))}
+        <section className="py-8">
+          <div className="overflow-hidden border shadow-xl" style={{ ...cardStyle, boxShadow: `0 24px 70px ${withAlpha(theme.accentColor, 0.12)}` }}>
+            <div className="grid gap-0 md:grid-cols-[minmax(0,1fr)_auto]">
+              <div className="p-5 sm:p-6">
+                <p className="text-xs font-semibold uppercase" style={{ color: theme.accentColor }}>Learning in public</p>
+                <h2 className="mt-3 text-2xl font-black">{portfolio.developerBlog?.title || section.title || "Developer Blog"}</h2>
+                <p className="mt-3 max-w-2xl text-sm leading-6" style={cardMutedStyle}>
+                  {portfolio.developerBlog?.description || "Career notes, lessons learned, and current challenges."}
+                </p>
+                {latestPost ? (
+                  <div className="mt-5 rounded-lg border p-4" style={{ borderColor: withAlpha(theme.accentColor, 0.2), backgroundColor: withAlpha(theme.accentColor, 0.08) }}>
+                    <p className="text-xs font-semibold" style={{ color: theme.accentColor }}>Latest post</p>
+                    <p className="mt-2 font-bold">{latestPost.title || "Career update"}</p>
+                    <p className="mt-2 text-sm leading-6" style={cardMutedStyle}>{latestPost.description || String(latestPost.text || "").slice(0, 120)}</p>
+                  </div>
+                ) : null}
+              </div>
+              <div className="flex items-center border-t p-5 md:border-l md:border-t-0" style={{ borderColor: theme.borderColor }}>
+                <a
+                  className="inline-flex w-full items-center justify-center rounded-lg px-5 py-3 text-sm font-bold shadow-lg transition hover:-translate-y-0.5 md:w-auto"
+                  style={{ backgroundColor: theme.accentColor, color: accentText, boxShadow: `0 16px 40px ${withAlpha(theme.accentColor, 0.18)}` }}
+                  href={`/${portfolio.username}/developer-blog`}
+                >
+                  Read Developer Blog
+                </a>
+              </div>
+            </div>
           </div>
-        </Block>
+        </section>
       );
+    }
     case "Resume":
       return <Block title={section.title} mutedStyle={mutedStyle}><a className="font-semibold" style={{ color: theme.accentColor }} href={props.url || "#"}>{props.label || "Download Resume PDF"}</a></Block>;
     case "Contact":

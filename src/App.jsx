@@ -15,6 +15,8 @@ const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const AdminDashboard = lazy(() => import("./admin/AdminDashboard"));
 const PortfolioPage = lazy(() => import("./pages/PortfolioPage"));
+const DeveloperBlogPage = lazy(() => import("./pages/DeveloperBlogPage"));
+const DeveloperBlogPostPage = lazy(() => import("./pages/DeveloperBlogPostPage"));
 const TemplatePreview = lazy(() => import("./pages/TemplatePreview"));
 
 function App() {
@@ -54,6 +56,8 @@ function App() {
               </Route>
             </Route>
 
+            <Route path="/:username/developer-blog" element={<DeveloperBlogPage />} />
+            <Route path="/:username/developer-blog/:postSlug" element={<DeveloperBlogPostPage />} />
             <Route path="/:username" element={<PortfolioPage />} />
           </Routes>
         </Suspense>

@@ -47,6 +47,11 @@ export default function Dashboard({ view }) {
           links: normalizeCustomList(data.links || defaultPortfolio.links),
           facts: normalizeCustomList(data.facts || defaultPortfolio.facts),
           customCode: { ...defaultPortfolio.customCode, ...data.customCode },
+          developerBlog: {
+            ...defaultPortfolio.developerBlog,
+            ...data.developerBlog,
+            theme: { ...defaultPortfolio.developerBlog.theme, ...data.developerBlog?.theme },
+          },
           sections: normalizeSections(data.sections || defaultPortfolio.sections),
         };
         setPortfolio(next);
@@ -57,7 +62,15 @@ export default function Dashboard({ view }) {
   }, [user]);
 
   const completion = useMemo(() => {
-    const fields = [portfolio.username, portfolio.displayName, portfolio.headline, portfolio.bio, portfolio.sections?.length, portfolio.socials?.github];
+    const fields = [
+      portfolio.username,
+      portfolio.displayName,
+      portfolio.headline,
+      portfolio.bio,
+      portfolio.sections?.length,
+      portfolio.socials?.github,
+      !portfolio.developerBlog?.enabled || portfolio.stories?.length,
+    ];
     return Math.round((fields.filter(Boolean).length / fields.length) * 100);
   }, [portfolio]);
 
@@ -215,6 +228,7 @@ function PublishPanel({ portfolio, savedUsername, dirty }) {
     ["Username", Boolean(savedUsername)],
     ["Name and headline", Boolean(portfolio.displayName && portfolio.headline)],
     ["Projects", Boolean(portfolio.sections?.find((section) => section.type === "Projects")?.props?.items?.length)],
+    ["Developer blog", !portfolio.developerBlog?.enabled || Boolean(portfolio.stories?.length)],
     ["Social link", Boolean(Object.values(portfolio.socials || {}).some(Boolean))],
     ["Saved changes", !dirty],
   ];
@@ -231,7 +245,7 @@ function PublishPanel({ portfolio, savedUsername, dirty }) {
           <Button className="w-full sm:w-auto" disabled={!url || dirty} onClick={() => window.open(`/${savedUsername}`, "_blank")}>Open</Button>
         </div>
       </div>
-      <div className="mt-4 grid gap-2 md:grid-cols-5">
+      <div className="mt-4 grid gap-2 md:grid-cols-3 lg:grid-cols-6">
         {checks.map(([label, done]) => (
           <span key={label} className={`rounded-lg border px-3 py-2 text-xs ${done ? "border-emerald-300/30 bg-emerald-300/10 text-emerald-100" : "border-white/10 bg-zinc-950/60 text-zinc-400"}`}>
             {done ? "Done" : "Todo"}: {label}
@@ -728,28 +742,119 @@ function normalizeCustomCode(source = {}) {
 }
 
 function Stories({ portfolio, setPortfolio }) {
+  const blog = { ...defaultPortfolio.developerBlog, ...portfolio.developerBlog };
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [topic, setTopic] = useState("Learning");
   const [text, setText] = useState("");
+
+  function setBlogEnabled(enabled) {
+    setPortfolio((prev) => ({
+      ...prev,
+      developerBlog: { ...defaultPortfolio.developerBlog, ...prev.developerBlog, enabled },
+      sections: ensureBlogSection(prev.sections, enabled),
+    }));
+    toast.success(enabled ? "Developer blog enabled" : "Developer blog hidden from public portfolio");
+  }
+
   function addStory() {
-    if (wordsCount(text) > 100) return toast.error("Stories are limited to 100 words");
-    setPortfolio((prev) => ({ ...prev, stories: [{ id: `s-${Date.now()}`, text, createdAt: new Date().toISOString() }, ...prev.stories] }));
+    if (wordsCount(description) > 40) return toast.error("Descriptions are limited to 40 words");
+    if (wordsCount(text) > 1200) return toast.error("Blog posts are limited to 1200 words");
+    const resolvedTitle = title.trim() || "Career update";
+    setPortfolio((prev) => ({
+      ...prev,
+      stories: [{
+        id: `s-${Date.now()}`,
+        title: resolvedTitle,
+        slug: slugify(`${resolvedTitle}-${Date.now()}`),
+        description: description.trim(),
+        topic: topic.trim() || "Journey",
+        text: text.trim(),
+        createdAt: new Date().toISOString(),
+      }, ...(prev.stories || [])],
+    }));
+    setTitle("");
+    setDescription("");
+    setTopic("Learning");
     setText("");
   }
+
+  if (!blog.enabled) {
+    return (
+      <Panel title="Developer Blog">
+        <div className="rounded-lg border border-cyan-300/20 bg-cyan-300/10 p-5">
+          <h3 className="text-lg font-bold text-cyan-100">Share your career journey</h3>
+          <p className="mt-2 text-sm leading-6 text-cyan-50/80">Turn this on to publish short posts about what you are learning, current career challenges, wins, blockers, and reflections.</p>
+          <Button className="mt-4 w-full sm:w-auto" onClick={() => setBlogEnabled(true)}>Turn On Developer Blog</Button>
+        </div>
+      </Panel>
+    );
+  }
+
   return (
-    <Panel title="Developer Stories">
-      <Field label={`New story (${wordsCount(text)}/100 words)`}><textarea className={inputClass} rows={3} value={text} onChange={(e) => setText(e.target.value)} /></Field>
-      <Button onClick={addStory} disabled={!text.trim()}>Publish Story</Button>
+    <Panel title={blog.title} action={<Button className="w-full sm:w-auto" variant="secondary" onClick={() => setBlogEnabled(false)}>Hide Blog</Button>}>
+      <div className="rounded-lg border border-white/10 bg-zinc-950/60 p-4">
+        <p className="text-sm leading-6 text-zinc-400">{blog.description}</p>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2">
+        <Field label="Post title"><input className={inputClass} value={title} onChange={(event) => setTitle(event.target.value)} placeholder="What I learned this week" /></Field>
+        <Field label="Topic"><input className={inputClass} value={topic} onChange={(event) => setTopic(event.target.value)} placeholder="Learning, Career, Challenge" /></Field>
+      </div>
+      <Field label={`SEO description (${wordsCount(description)}/40 words)`}><textarea className={inputClass} rows={2} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="A short summary shown on the blog list and in search previews." /></Field>
+      <Field label={`Blog body (${wordsCount(text)}/1200 words)`}><textarea className={`${inputClass} min-h-[260px]`} rows={10} value={text} onChange={(e) => setText(e.target.value)} placeholder="Write the full blog post: your journey, what you learned, how you learned it, what blocked you, and what changed." /></Field>
+      <Button onClick={addStory} disabled={!text.trim()}>Publish Post</Button>
       <div className="mt-5 grid gap-3">
-        {portfolio.stories.map((story) => <div key={story.id} className="rounded-xl border border-white/10 bg-white/5 p-4"><p className="text-sm text-zinc-500">{new Date(story.createdAt).toLocaleString()}</p><p className="mt-2">{story.text}</p><Button className="mt-3" variant="danger" onClick={() => setPortfolio((prev) => ({ ...prev, stories: prev.stories.filter((item) => item.id !== story.id) }))}>Delete</Button></div>)}
+        {(portfolio.stories || []).map((story) => (
+          <div key={story.id} className="rounded-xl border border-white/10 bg-white/5 p-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0">
+                <p className="text-sm text-zinc-500">{new Date(story.createdAt).toLocaleString()}</p>
+                <h3 className="mt-2 break-words font-bold">{story.title || "Career update"}</h3>
+                {story.description ? <p className="mt-2 text-sm leading-6 text-zinc-400">{story.description}</p> : null}
+              </div>
+              {story.topic ? <span className="w-fit rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-xs font-semibold text-cyan-100">{story.topic}</span> : null}
+            </div>
+            <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-zinc-200">{story.text}</p>
+            <Button className="mt-3 w-full sm:w-auto" variant="danger" onClick={() => setPortfolio((prev) => ({ ...prev, stories: (prev.stories || []).filter((item) => item.id !== story.id) }))}>Delete</Button>
+          </div>
+        ))}
       </div>
     </Panel>
   );
 }
 
+function slugify(value = "") {
+  return value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80) || `post-${Date.now()}`;
+}
+
+function ensureBlogSection(sections = [], enabled = true) {
+  const normalized = normalizeSections(sections);
+  const existing = normalized.find((section) => section.type === "User Stories" || section.type === "Blogs");
+  if (existing) {
+    return normalized.map((section) => section.id === existing.id ? { ...section, visible: enabled, title: section.title || "Developer Blog" } : section);
+  }
+  const blogSection = { ...createSection("User Stories"), visible: enabled, title: "Developer Blog" };
+  const heroIndex = normalized.findIndex((section) => section.type === "Hero");
+  if (heroIndex < 0) return [blogSection, ...normalized];
+  return [...normalized.slice(0, heroIndex + 1), blogSection, ...normalized.slice(heroIndex + 1)];
+}
+
 function Settings({ portfolio, setPortfolio, availability }) {
+  const blog = { ...defaultPortfolio.developerBlog, ...portfolio.developerBlog };
+  const blogTheme = { ...defaultPortfolio.developerBlog.theme, ...blog.theme };
   const upsertLink = (label, value) => setPortfolio((prev) => ({
     ...prev,
     links: upsertCustomLink(prev.links || [], label, value),
   }));
+  const updateBlog = (updates) => setPortfolio((prev) => {
+    const nextBlog = { ...defaultPortfolio.developerBlog, ...prev.developerBlog, ...updates };
+    return {
+      ...prev,
+      developerBlog: nextBlog,
+      sections: Object.prototype.hasOwnProperty.call(updates, "enabled") ? ensureBlogSection(prev.sections, nextBlog.enabled) : prev.sections,
+    };
+  });
+  const updateBlogTheme = (updates) => updateBlog({ theme: { ...blogTheme, ...updates } });
   async function syncGitHub() {
     try {
       const profile = await fetchGitHubProfile(portfolio.githubUsername || portfolio.socials?.github?.split("/").filter(Boolean).pop());
@@ -769,6 +874,72 @@ function Settings({ portfolio, setPortfolio, availability }) {
   return (
     <Panel title="Settings">
       <ProfileEditor portfolio={portfolio} setPortfolio={setPortfolio} availability={availability} />
+      <div className="rounded-lg border border-white/10 bg-white/5 p-5">
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div className="min-w-0">
+            <h3 className="font-bold">Developer Blog / Stories</h3>
+            <p className="mt-2 text-sm leading-6 text-zinc-400">Let users publish short career posts about what they learned, how they learned it, and what they are facing right now.</p>
+          </div>
+          <Button className="w-full shrink-0 sm:w-auto" variant={blog.enabled ? "primary" : "secondary"} onClick={() => updateBlog({ enabled: !blog.enabled })}>
+            {blog.enabled ? "Blog On" : "Turn On Blog"}
+          </Button>
+        </div>
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <Field label="Public section title">
+            <input className={inputClass} value={blog.title} onChange={(event) => updateBlog({ title: event.target.value })} />
+          </Field>
+          <Field label="Public description">
+            <input className={inputClass} value={blog.description} onChange={(event) => updateBlog({ description: event.target.value })} />
+          </Field>
+        </div>
+        <div className="mt-5 rounded-lg border border-white/10 bg-zinc-950/60 p-4">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h4 className="font-bold">Blog theme</h4>
+              <p className="mt-1 text-sm text-zinc-400">Choose whether the blog pages follow the portfolio theme or use their own reading-focused theme.</p>
+            </div>
+            <label className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-200">
+              <span>Use portfolio theme</span>
+              <input className="h-5 w-5 accent-cyan-300" type="checkbox" checked={Boolean(blog.usePortfolioTheme)} onChange={(event) => updateBlog({ usePortfolioTheme: event.target.checked })} />
+            </label>
+          </div>
+          {!blog.usePortfolioTheme ? (
+            <>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                {themePresets.map((preset) => (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    onClick={() => updateBlogTheme(preset)}
+                    className={`rounded-lg border p-3 text-left transition ${blogTheme.name === preset.name ? "border-cyan-300 bg-cyan-300/10" : "border-white/10 bg-zinc-950/60 hover:border-white/30"}`}
+                  >
+                    <div className="flex gap-2">
+                      {[preset.backgroundColor, preset.surfaceColor, preset.accentColor, preset.textColor].map((color) => (
+                        <span key={color} className="h-6 w-6 rounded-full border border-white/20" style={{ backgroundColor: color }} />
+                      ))}
+                    </div>
+                    <p className="mt-3 text-sm font-semibold">{preset.name}</p>
+                  </button>
+                ))}
+              </div>
+              <div className="mt-4 grid gap-4 md:grid-cols-2">
+                <ColorField label="Blog accent" value={blogTheme.accentColor} onChange={(value) => updateBlogTheme({ accentColor: value })} />
+                <ColorField label="Blog background" value={blogTheme.backgroundColor} onChange={(value) => updateBlogTheme({ backgroundColor: value })} />
+                <ColorField label="Blog text" value={blogTheme.textColor} onChange={(value) => updateBlogTheme({ textColor: value })} />
+                <ColorField label="Blog surface" value={blogTheme.surfaceColor} onChange={(value) => updateBlogTheme({ surfaceColor: value })} />
+                <Field label="Blog font family">
+                  <select className={inputClass} value={blogTheme.fontFamily} onChange={(event) => updateBlogTheme({ fontFamily: event.target.value })}>
+                    <option value="Inter, system-ui, sans-serif">Inter / System</option>
+                    <option value="Georgia, serif">Editorial Serif</option>
+                    <option value="ui-monospace, SFMono-Regular, Menlo, monospace">Mono Journal</option>
+                  </select>
+                </Field>
+              </div>
+            </>
+          ) : null}
+        </div>
+        <p className="mt-3 text-sm text-zinc-500">{blog.enabled ? "Enabled posts will appear on the public portfolio after saving." : "The public blog section is hidden until this is turned on."}</p>
+      </div>
       <div className="rounded-lg border border-white/10 bg-white/5 p-5">
         <h3 className="font-bold">Connected Profiles</h3>
         <p className="mt-2 text-sm text-zinc-400">Attach the profiles you want shown publicly. Empty fields stay hidden.</p>

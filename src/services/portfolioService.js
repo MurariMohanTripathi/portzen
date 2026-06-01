@@ -102,6 +102,13 @@ export async function savePortfolio(uid, portfolio) {
   sections.forEach((section, order) => {
     batch.set(doc(users, uid, "sections", section.id), { ...section, order }, { merge: true });
   });
+  const existingStories = await getDocs(collection(users, uid, "stories"));
+  const nextStoryIds = new Set(stories.map((story) => story.id));
+  existingStories.forEach((storyDoc) => {
+    if (!nextStoryIds.has(storyDoc.id)) {
+      batch.delete(doc(users, uid, "stories", storyDoc.id));
+    }
+  });
   stories.forEach((story) => {
     batch.set(doc(users, uid, "stories", story.id), story, { merge: true });
   });
@@ -190,6 +197,11 @@ function normalizePortfolio(data = {}) {
     theme: { ...defaultPortfolio.theme, ...data.theme },
     display: { ...defaultPortfolio.display, ...data.display },
     customCode: { ...defaultPortfolio.customCode, ...data.customCode },
+    developerBlog: {
+      ...defaultPortfolio.developerBlog,
+      ...data.developerBlog,
+      theme: { ...defaultPortfolio.developerBlog.theme, ...data.developerBlog?.theme },
+    },
     sections: normalizeSections(data.sections || defaultPortfolio.sections),
     stories: data.stories || defaultPortfolio.stories,
   };

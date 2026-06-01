@@ -127,6 +127,23 @@ export const defaultPortfolio = {
     bookmarks: 0,
     clicks: 0,
   },
+  developerBlog: {
+    enabled: false,
+    usePortfolioTheme: true,
+    title: "Developer Blog",
+    description: "Career notes, lessons learned, current challenges, and growth updates.",
+    theme: {
+      ...themePresets[1],
+      id: "blog-studio",
+      name: "Blog Studio",
+      accentColor: "#2563eb",
+      backgroundColor: "#f8fafc",
+      textColor: "#0f172a",
+      surfaceColor: "#ffffff",
+      fontFamily: "Inter, system-ui, sans-serif",
+      cornerRadius: 10,
+    },
+  },
   sections: [
     {
       id: "hero",
@@ -217,7 +234,7 @@ export const defaultPortfolio = {
     {
       id: "stories",
       type: "User Stories",
-      visible: true,
+      visible: false,
       title: "Developer Stories",
       props: {},
     },
@@ -234,6 +251,10 @@ export const defaultPortfolio = {
   stories: [
     {
       id: "s1",
+      title: "Learning in public",
+      slug: "learning-in-public",
+      description: "A short note about current learning goals and building PortZen.",
+      topic: "Journey",
       text: "Currently learning distributed systems and building PortZen.",
       createdAt: new Date().toISOString(),
     },

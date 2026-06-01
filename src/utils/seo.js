@@ -61,6 +61,35 @@ export function applyPortfolioSeo(portfolio) {
   });
 }
 
+export function blogDescription(portfolio, story) {
+  if (story?.description) return story.description;
+  if (story?.text) return story.text.replace(/\s+/g, " ").slice(0, 155);
+  return portfolio?.developerBlog?.description || portfolio?.headline || "Developer blog built with PortZen.";
+}
+
+export function applyDeveloperBlogSeo(portfolio) {
+  const name = portfolio?.displayName || portfolio?.username || "Developer";
+  const blog = portfolio?.developerBlog || {};
+  applyPageSeo({
+    title: `${blog.title || "Developer Blog"} by ${name} | PortZen`,
+    description: blog.description || `${name}'s developer blog, career journey, lessons learned, and current work.`,
+    type: "website",
+    path: `/${portfolio?.username || ""}/developer-blog`,
+    noIndex: portfolio?.banned || !blog.enabled,
+  });
+}
+
+export function applyDeveloperBlogPostSeo(portfolio, story) {
+  const name = portfolio?.displayName || portfolio?.username || "Developer";
+  applyPageSeo({
+    title: `${story?.title || "Developer Blog Post"} by ${name} | PortZen`,
+    description: blogDescription(portfolio, story),
+    type: "article",
+    path: `/${portfolio?.username || ""}/developer-blog/${story?.slug || story?.id || ""}`,
+    noIndex: portfolio?.banned || !portfolio?.developerBlog?.enabled || !story,
+  });
+}
+
 function upsertMeta(name, content, attr = "name") {
   let tag = document.head.querySelector(`meta[${attr}="${name}"]`);
   if (!tag) {

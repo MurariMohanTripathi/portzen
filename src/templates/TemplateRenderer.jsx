@@ -8,6 +8,11 @@ export default function TemplateRenderer({ portfolio }) {
     ...defaultPortfolio,
     ...source,
     theme: { ...defaultPortfolio.theme, ...source.theme },
+    developerBlog: {
+      ...defaultPortfolio.developerBlog,
+      ...source.developerBlog,
+      theme: { ...defaultPortfolio.developerBlog.theme, ...source.developerBlog?.theme },
+    },
     sections: normalizeSections(source.sections || defaultPortfolio.sections),
     accentColor: source.theme?.accentColor || source.accentColor || defaultPortfolio.accentColor,
   };
