@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { defaultPortfolio, sectionTypes, templates, themePresets } from "../data/portfolioSchema";
 import { useAuth } from "../contexts/AuthContext";
-import { getPortfolioByUid, savePortfolio } from "../services/portfolioService";
+import { deletePortfolioMessage, getPortfolioByUid, listPortfolioMessages, markPortfolioMessageRead, savePortfolio } from "../services/portfolioService";
 import { fetchGitHubProfile } from "../services/githubService";
 import { uploadProjectImage } from "../services/storageService";
 import useUsernameAvailability from "../hooks/useUsernameAvailability";
@@ -163,6 +163,7 @@ export default function Dashboard({ view }) {
       {view === "experience" && <Experience portfolio={portfolio} setPortfolio={setPortfolio} />}
       {view === "templates" && <Templates portfolio={portfolio} setPortfolio={setPortfolio} />}
       {view === "code" && <CodeYourOwnFolio portfolio={portfolio} setPortfolio={setPortfolio} />}
+      {view === "inbox" && <Inbox />}
       {view === "stories" && <Stories portfolio={portfolio} setPortfolio={setPortfolio} />}
       {view === "settings" && <Settings portfolio={portfolio} setPortfolio={setPortfolio} availability={availability} />}
     </div>
@@ -175,6 +176,110 @@ function snapshotPortfolio(portfolio) {
     updatedAt: undefined,
     createdAt: undefined,
   });
+}
+
+function Inbox() {
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const unreadCount = messages.filter((message) => !message.read).length;
+
+  async function loadMessages() {
+    setLoading(true);
+    try {
+      setMessages(await listPortfolioMessages());
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    let active = true;
+    listPortfolioMessages()
+      .then((items) => {
+        if (active) setMessages(items);
+      })
+      .catch((error) => {
+        if (active) toast.error(error.message);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  async function markRead(messageId) {
+    try {
+      await markPortfolioMessageRead(messageId);
+      setMessages((prev) => prev.map((message) => message.id === messageId ? { ...message, read: true, readAt: new Date().toISOString() } : message));
+    } catch (error) {
+      toast.error(error.message);
+    }
+  }
+
+  async function removeMessage(messageId) {
+    try {
+      await deletePortfolioMessage(messageId);
+      setMessages((prev) => prev.filter((message) => message.id !== messageId));
+      toast.success("Message deleted");
+    } catch (error) {
+      toast.error(error.message);
+    }
+  }
+
+  return (
+    <Panel
+      title="Inbox"
+      action={<Button className="w-full sm:w-auto" variant="secondary" onClick={loadMessages}>Refresh</Button>}
+    >
+      <div className="grid gap-3 sm:grid-cols-3">
+        <Metric label="Total messages" value={messages.length} />
+        <Metric label="Unread" value={unreadCount} />
+        <Metric label="Read" value={messages.length - unreadCount} />
+      </div>
+      {loading ? (
+        <div className="rounded-lg border border-white/10 bg-zinc-950/60 p-6 text-sm text-zinc-400">Loading messages...</div>
+      ) : messages.length ? (
+        <div className="grid gap-3">
+          {messages.map((message) => (
+            <article key={message.id} className={`rounded-lg border p-4 ${message.read ? "border-white/10 bg-white/5" : "border-cyan-300/30 bg-cyan-300/10"}`}>
+              <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="break-words text-lg font-bold">{message.name}</h3>
+                    {!message.read ? <span className="rounded-full bg-cyan-300 px-2.5 py-1 text-xs font-black text-zinc-950">New</span> : null}
+                  </div>
+                  <a className="mt-1 block break-words text-sm text-cyan-200 hover:text-cyan-100" href={`mailto:${message.email}`}>{message.email}</a>
+                  <p className="mt-1 text-xs text-zinc-500">{formatMessageDate(message.createdAt)}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0">
+                  {!message.read ? <Button className="w-full sm:w-auto" variant="secondary" onClick={() => markRead(message.id)}>Mark Read</Button> : null}
+                  <Button className="w-full sm:w-auto" variant="danger" onClick={() => removeMessage(message.id)}>Delete</Button>
+                </div>
+              </div>
+              <p className="mt-4 whitespace-pre-wrap break-words rounded-lg border border-white/10 bg-zinc-950/60 p-4 text-sm leading-6 text-zinc-200">{message.message}</p>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div className="rounded-lg border border-white/10 bg-zinc-950/60 p-8 text-center">
+          <h3 className="text-lg font-bold">No messages yet</h3>
+          <p className="mt-2 text-sm text-zinc-400">Messages sent from your public portfolio contact form will appear here.</p>
+        </div>
+      )}
+    </Panel>
+  );
+}
+
+function formatMessageDate(value) {
+  if (!value) return "Just now";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Just now";
+  return date.toLocaleString();
 }
 
 function normalizeCustomList(items = []) {

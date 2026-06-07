@@ -2,6 +2,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  addDoc,
   getDoc,
   getDocs,
   increment,
@@ -10,6 +11,7 @@ import {
   query,
   runTransaction,
   serverTimestamp,
+  updateDoc,
   where,
   writeBatch,
 } from "firebase/firestore";
@@ -150,6 +152,37 @@ export async function incrementPortfolioView(uid, visitorId) {
   });
 }
 
+export async function submitPortfolioMessage(uid, message) {
+  if (!uid) throw new Error("Portfolio owner is missing.");
+  const payload = normalizeContactMessage(message, uid);
+  const messageRef = await addDoc(collection(users, uid, "messages"), payload);
+  return { id: messageRef.id, delivered: true };
+}
+
+export async function listPortfolioMessages() {
+  const uid = auth.currentUser?.uid;
+  if (!uid) throw new Error("Please log in again.");
+  const snapshot = await getDocs(query(collection(users, uid, "messages"), orderBy("createdAt", "desc"), limit(75)));
+  return snapshot.docs.map((item) => normalizeInboxMessage(item.id, item.data()));
+}
+
+export async function markPortfolioMessageRead(messageId) {
+  const uid = auth.currentUser?.uid;
+  if (!uid) throw new Error("Please log in again.");
+  await updateDoc(doc(users, uid, "messages", messageId), {
+    read: true,
+    readAt: serverTimestamp(),
+  });
+  return { id: messageId, read: true };
+}
+
+export async function deletePortfolioMessage(messageId) {
+  const uid = auth.currentUser?.uid;
+  if (!uid) throw new Error("Please log in again.");
+  await deleteDoc(doc(users, uid, "messages", messageId));
+  return { id: messageId, deleted: true };
+}
+
 export async function listAdminUsers() {
   const snapshot = await getDocs(query(users, limit(100)));
   return snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
@@ -213,4 +246,35 @@ function normalizeCustomList(items = []) {
     label: item.label || "",
     value: item.value || "",
   }));
+}
+
+function normalizeContactMessage(message = {}, uid) {
+  const name = cleanText(message.name, 120);
+  const email = cleanText(message.email, 160).toLowerCase();
+  const body = String(message.message || "").trim().slice(0, 2000);
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!name || !email || !body) throw new Error("Name, email, and message are required.");
+  if (!emailPattern.test(email)) throw new Error("Enter a valid email address.");
+  return {
+    name,
+    email,
+    message: body,
+    portfolioUid: uid,
+    read: false,
+    createdAt: serverTimestamp(),
+    source: "public_portfolio",
+  };
+}
+
+function normalizeInboxMessage(id, data = {}) {
+  return {
+    id,
+    ...data,
+    createdAt: data.createdAt?.toDate?.()?.toISOString?.() || data.createdAt || null,
+    readAt: data.readAt?.toDate?.()?.toISOString?.() || data.readAt || null,
+  };
+}
+
+function cleanText(value = "", maxLength = 1000) {
+  return String(value).trim().replace(/\s+/g, " ").slice(0, maxLength);
 }

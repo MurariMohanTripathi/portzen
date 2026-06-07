@@ -41,6 +41,7 @@ function App() {
                 <Route path="experience" element={<Dashboard view="experience" />} />
                 <Route path="templates" element={<Dashboard view="templates" />} />
                 <Route path="code" element={<Dashboard view="code" />} />
+                <Route path="inbox" element={<Dashboard view="inbox" />} />
                 <Route path="settings" element={<Dashboard view="settings" />} />
                 <Route path="stories" element={<Dashboard view="stories" />} />
               </Route>

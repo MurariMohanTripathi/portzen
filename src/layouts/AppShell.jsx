@@ -15,6 +15,7 @@ const links = [
   ["Experience", "/dashboard/experience"],
   ["Templates", "/dashboard/templates"],
   ["Code Your Own Folio", "/dashboard/code"],
+  ["Inbox", "/dashboard/inbox"],
   ["Developer Blog", "/dashboard/stories"],
   ["Settings", "/dashboard/settings"],
 ];
