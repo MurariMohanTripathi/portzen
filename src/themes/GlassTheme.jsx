@@ -21,7 +21,6 @@ export default function GlassTheme({ portfolio }) {
           <PortfolioRenderer portfolio={portfolio} variant="dark" />
         </div>
       </div>
-      <SiteFooter variant="detailed" portfolio={portfolio} />
     </main>
   );
 }

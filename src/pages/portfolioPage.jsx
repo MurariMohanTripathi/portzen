@@ -44,6 +44,7 @@ export default function PortfolioPage() {
     <main className="min-h-screen bg-zinc-950">
       <TemplateRenderer portfolio={portfolio} />
       <PortfolioContactForm portfolio={portfolio} />
+      <SiteFooter variant="detailed" portfolio={portfolio} />
     </main>
   );
 }

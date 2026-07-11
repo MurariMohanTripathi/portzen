@@ -19,7 +19,6 @@ export default function MinimalTheme({ portfolio }) {
       <div className="mx-auto max-w-4xl px-5 py-12">
         <PortfolioRenderer portfolio={portfolio} variant="light" />
       </div>
-      <SiteFooter variant="detailed" portfolio={portfolio} />
     </main>
   );
 }
